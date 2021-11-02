@@ -1,0 +1,30 @@
+<div>
+    <form>
+        <label for="name">User Name:</label><br>
+        <input type='text' id="Username", name="Username"><br>
+        <label for="email">User Email:</label><br>
+        <input type='text' id="Useremail", name="Useremail"><br>
+    </form>
+    <button onclick="createUser()">
+        Submit
+    </button>
+    <script type="text/javascript">
+        function createUser() {
+            var myHeaders = new Headers();
+            myHeaders.append("Content-Type", "application/json");
+            var raw = JSON.stringify({
+                "name": document.getElementById("Username").value,
+                "email": document.getElementById("Useremail").value
+            });
+            var requestOptions = {
+                method: 'POST',
+                headers: myHeaders,
+                body: raw,
+                redirect: 'follow'
+            };
+            const url = "http://localhost:8000/Users/"
+            fetch(url, requestOptions).then(response => response.text())
+        }
+    </script>
+</div>
+
