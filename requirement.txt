@@ -1,0 +1,12 @@
+backports.entry-points-selectable==1.1.0
+distlib==0.3.3
+filelock==3.2.0
+platformdirs==2.4.0
+six==1.16.0
+virtualenv==20.8.1
+virtualenvwrapper-win==1.2.6
+django==3.2.7
+djangorestframework==3.12.2
+mysqlclient==2.0.3
+pillow==8.3.2
+docker==5.0.3
