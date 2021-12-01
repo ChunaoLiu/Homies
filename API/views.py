@@ -25,6 +25,11 @@ class AllUserList(APIView):
             return Response(serializer.data, status=status.HTTP_201_CREATED) # HTTP 201: CREATED
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST) # HTTP 400: BAD REQUEST
     
+    
 def index(request):
     template = loader.get_template('index.html')
+    return HttpResponse(template.render({}, request))
+
+def signup(request):
+    template = loader.get_template('Register.html')
     return HttpResponse(template.render({}, request))

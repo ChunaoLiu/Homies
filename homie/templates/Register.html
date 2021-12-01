@@ -12,6 +12,11 @@
             }
         </style>
     </head>
+
+    <div>
+        <h1 style="text-align: center; padding-bottom: 20px; padding-top: 20px;"> Join Homie Now! </h1>
+    </div>
+
     <form>
 
         <label for="email">Your Email:</label><br>
@@ -21,15 +26,32 @@
         
     </form>
     <div style="text-align: center; padding-top: 30px;">
-        <button onclick="login()", style="text-align: center; margin: auto; display: inline; width: 70px; height: 40px;">
+        <button onclick="createUser()", style="text-align: center; margin: auto; display: inline; width: 70px; height: 40px;">
             Login
         </button>
-        <button onclick="toSignUp()", style="text-align: center; margin: auto; display: inline; margin-left: 100px; width: 70px; height: 40px;">
+        <button onclick="createUser()", style="text-align: center; margin: auto; display: inline; margin-left: 100px; width: 70px; height: 40px;">
             Signup
         </button>
     </div>
     
     <script type="text/javascript">
+        function createUser() {
+            var myHeaders = new Headers();
+            myHeaders.append("Content-Type", "application/json");
+            var raw = JSON.stringify({
+                "name": document.getElementById("Username").value,
+                "email": document.getElementById("Useremail").value
+            });
+            var requestOptions = {
+                method: 'POST',
+                headers: myHeaders,
+                body: raw,
+                redirect: 'follow'
+            };
+            const url = "http://localhost:8000/Users/"
+            fetch(url, requestOptions).then(response => response.text())
+        }
+
         function login() {
             var myHeaders = new Headers();
             myHeaders.append("Content-Type", "application/json");
@@ -43,13 +65,8 @@
                 body: raw,
                 redirect: 'follow'
             };
-            const url = "http://localhost:8000/Users/";
-            fetch(url, requestOptions).then(response => response.text());
-        }
-        function toSignUp() {
-            console.log("Here")
-            location.href = 'http://localhost:8080/signup/';
-            return false;
+            const url = "http://localhost:8000/Users/"
+            fetch(url, requestOptions).then(response => response.text())
         }
     </script>
 </div>
