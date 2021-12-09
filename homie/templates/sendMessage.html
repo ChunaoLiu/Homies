@@ -1,0 +1,51 @@
+<div>
+    <head>
+        <style>
+            form {
+                text-align: left;
+                margin: auto;
+                border: 3px solid green;
+                padding: 20px 20px;
+                width: 500px;
+                min-height: 100px;
+                height: auto;
+            }
+            textarea {
+                resize: none;
+                width: 500px;
+                height: 200px;
+            }
+        </style>
+    </head>
+
+    <div>
+        <h1 style="text-align: center; padding-bottom: 20px; padding-top: 20px;">Post Message</h1>
+    </div>
+
+    <form>
+        <textarea id="messageText" autofocus></textarea>
+    </form>
+
+    <div style="text-align: center; padding-top: 30px;">
+        <button onclick = "postMessage()", style="text-align: center; margin: auto; display: inline; width: 70px; height: 40px;">
+            Post
+        </button>
+    </div>
+
+    <script type="text/javascript">
+        function postMessage() {
+            var textToSend = document.getElementById("messageText").value;
+            if (textToSend == "")
+            {
+                alert("Sorry, your message can't be empty. Please try again!");
+            }
+            else
+            {
+                alert("Message Successfully Sent!");
+                console.log(textToSend);
+            }
+            return false;
+        }
+    </script>
+
+</div>
