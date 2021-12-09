@@ -1,4 +1,6 @@
 import sys
+from django.db import models
+from django.db.models.fields import EmailField
 
 from django.db.models.query import QuerySet
 from django.shortcuts import render, HttpResponse
@@ -9,6 +11,17 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.decorators import APIView
 from django.template import loader
+from django.shortcuts import render
+import json
+from django.http import JsonResponse
+
+from django.contrib.auth import authenticate, login, logout, get_user_model
+from rest_framework.authentication import TokenAuthentication, BasicAuthentication
+from rest_framework.authtoken.models import Token
+from rest_framework.decorators import APIView, permission_classes, authentication_classes, api_view
+from rest_framework.permissions import IsAuthenticated, AllowAny
+
+from django.db import transaction
 
 # Create your views here.
 class AllUserList(APIView):
@@ -17,14 +30,71 @@ class AllUserList(APIView):
         Serializer = UserSerializer(users, many=True)
         return Response(Serializer.data)
     
+
+
+@permission_classes((AllowAny,))
+@authentication_classes([TokenAuthentication])
+@transaction.atomic()
+class SignupAPI(APIView):
     def post(self, request):
         print(request.data)
-        serializer = UserSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED) # HTTP 201: CREATED
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST) # HTTP 400: BAD REQUEST
+
+        return_data = {}
+        
+        New_name = request.data['username']
+        New_password = request.data['password']
+        New_email = request.data['email']
+        New_age = request.data['age']
+        New_gender = request.data['gender']
+
+        exist_obj = User.objects.get(email=New_email)
+        if (exist_obj != None):
+            return_data['error_code'] = 1
+            response = HttpResponse(json.dumps(return_data),
+                                    content_type='application/json', status=status.HTTP_409_CONFLICT)
+            return response
+
+        if (New_email != None and New_password != None and New_name != None and New_gender != None and New_age != None):
+            userModel = get_user_model()
+            user_auth = userModel.objects.create_user(username=New_name, password=New_password)
+            user_auth.save()
+            new_User = User.objects.create(name=New_name, password=New_password, email=New_email, age=New_age, gender=New_gender, pk=user_auth.pk)
+            new_User.save()
+            return_data['error_code'] = 0
+            response = HttpResponse(json.dumps(return_data),
+                                    content_type='application/json', status=status.HTTP_201_CREATED)
+            return response
+        return_data['error_code'] = 2
+        response = HttpResponse(json.dumps(return_data),
+                                    content_type='application/json', status=status.HTTP_400_BAD_REQUEST)
+        return response
+
+@permission_classes((AllowAny,))
+@authentication_classes([TokenAuthentication])
+@transaction.atomic()
+class UserLogIn(APIView):
+    def post(self, request):
+        print(request.data)
+
+        return_data = {}
+
+        Login_email = request.data['email']
+        Login_password = request.data['password']
+
+        exist_obj = User.objects.get()
+
+class DeleteUserByID(APIView):
+    def delete(self, request, uid):
+        target = User.objects.get(pk=uid)
+        if (target == None):
+            return Response(status=status.HTTP_404_NOT_FOUND)
+        target.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
     
 def index(request):
     template = loader.get_template('index.html')
+    return HttpResponse(template.render({}, request))
+
+def signup(request):
+    template = loader.get_template('addUserCol.html')
     return HttpResponse(template.render({}, request))

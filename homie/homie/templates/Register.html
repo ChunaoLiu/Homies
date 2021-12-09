@@ -1,0 +1,62 @@
+<html>
+    <div>
+        <head>
+            <style>
+                form {
+                    text-align: center;
+                    margin: auto;
+                    border: 3px solid green;
+                    padding: 50px 50px;
+                    width: 400px;
+                    min-height: 100px;
+                    height: auto;
+                }
+            </style>
+        </head>
+    
+        <div>
+            <h1 style="text-align: center; padding-bottom: 5px; padding-top: 20px;"> Welcome Back to Homie! </h1>
+            <h2 style="text-align: center; padding-bottom: 20px;"> Please Login first </h2>
+        </div>
+    
+        <form>
+    
+            <label for="email">Your Email:</label><br>
+            <input type='text' id="Useremail", name="Useremail"><br>
+            <label for="password">Your Password:</label><br>
+            <input type='text' id="Userpassword", name="Userpassword"><br>
+            
+        </form>
+        <div style="text-align: center; padding-top: 30px;">
+            <button onclick="login()", style="text-align: center; margin: auto; display: inline; width: 70px; height: 40px;">
+                Login
+            </button>
+            <button onclick="redirect_signup()", style="text-align: center; margin: auto; display: inline; margin-left: 100px; width: 70px; height: 40px;">
+                Signup
+            </button>
+        </div>
+        
+        <script type="text/javascript">
+            function redirect_signup() {
+                location.href = "http://localhost:8080/signup/";
+            }
+    
+            function login() {
+                var myHeaders = new Headers();
+                myHeaders.append("Content-Type", "application/json");
+                var raw = JSON.stringify({
+                    "name": document.getElementById("Username").value,
+                    "email": document.getElementById("Useremail").value
+                });
+                var requestOptions = {
+                    method: 'POST',
+                    headers: myHeaders,
+                    body: raw,
+                    redirect: 'follow'
+                };
+                const url = "http://localhost:8000/Users/"
+                fetch(url, requestOptions).then(response => response.text())
+            }
+        </script>
+    </div>    
+</html>

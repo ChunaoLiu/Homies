@@ -1,30 +1,94 @@
-<div>
-    <form>
-        <label for="name">User Name:</label><br>
-        <input type='text' id="Username", name="Username"><br>
-        <label for="email">User Email:</label><br>
-        <input type='text' id="Useremail", name="Useremail"><br>
-    </form>
-    <button onclick="createUser()">
-        Submit
-    </button>
-    <script type="text/javascript">
-        function createUser() {
-            var myHeaders = new Headers();
-            myHeaders.append("Content-Type", "application/json");
-            var raw = JSON.stringify({
-                "name": document.getElementById("Username").value,
-                "email": document.getElementById("Useremail").value
-            });
-            var requestOptions = {
-                method: 'POST',
-                headers: myHeaders,
-                body: raw,
-                redirect: 'follow'
-            };
-            const url = "http://localhost:8000/Users/"
-            fetch(url, requestOptions).then(response => response.text())
-        }
-    </script>
-</div>
-
+<html>
+    <div>
+        <head>
+            <style>
+                form {
+                    text-align: center;
+                    margin: auto;
+                    border: 3px solid green;
+                    padding: 50px 50px;
+                    width: 400px;
+                    min-height: 100px;
+                    height: auto;
+                }
+            </style>
+        </head>
+    
+        <div>
+            <h1 style="text-align: center; padding-bottom: 20px; padding-top: 20px;"> Join Homie Now! </h1>
+        </div>
+    
+        <form>
+            
+            <label for="UserName">Your Name:</label><br>
+            <input type='text' id="UserName", name="UserName"><br>
+            <label for="email">Your Email:</label><br>
+            <input type='text' id="Useremail", name="Useremail"><br>
+            <label for="password">Your Password:</label><br>
+            <input type='text', id="Userpassword", name="Userpassword"><br><br>
+            <div>
+                <label for="age">Your age:</label>
+                <input style="width: 40px;" type='number' maxlength="3" id="Userage" size="4", name="UserAge">
+            </div><br>
+            <div>
+                <label for="gender">Your gender:</label>
+                <select name="gender" id="gender">
+                    <option value="Male">Male</option>
+                    <option value="Female">Male</option>
+                    <option value="Others">Male</option>
+                </select>
+            </div><br>
+            
+            
+        </form>
+        <div style="text-align: center; padding-top: 30px;">
+            <button onclick="redirect_login()", style="text-align: center; margin: auto; display: inline; width: 150px; height: 40px;">
+                Go back to log in
+            </button>
+            <button onclick="signup()", style="text-align: center; margin: auto; display: inline; margin-left: 100px; width: 70px; height: 40px;">
+                Signup
+            </button>
+        </div>
+        
+        <script type="text/javascript">
+            function redirect_login() {
+                location.href = "http://localhost:8080/homepage/";
+            }
+    
+            function signup() {
+                var myHeaders = new Headers();
+                myHeaders.append("Content-Type", "application/json");
+                var raw = JSON.stringify({
+                    "username": document.getElementById("UserName").value,
+                    "password": document.getElementById("Userpassword").value,
+                    "email": document.getElementById("Useremail").value,
+                    "gender": document.getElementById("gender").value,
+                    "age": document.getElementById("Userage").value
+                });
+                var requestOptions = {
+                    method: 'POST',
+                    headers: myHeaders,
+                    body: raw,
+                    redirect: 'follow'
+                };
+                const url = "http://localhost:8080/SignupAPI/"
+                fetch(url, requestOptions)
+                .then(response => response.json())
+                .then(data => {
+                    console.log(data);
+                    switch (data['error_code']) {
+                        case 0:
+                            window.alert("Registration successful! Redirecting to the home page now...");
+                            break;
+                        case 1:
+                            window.alert("Error: Email already taken!");
+                            break;
+                        case 2:
+                            window.alert("Error: Please check your info is correct!");
+                            break;
+                    }
+                });
+            }
+        </script>
+    </div>    
+</html>
