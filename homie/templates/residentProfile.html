@@ -1,0 +1,50 @@
+<div>
+    <head>
+        <style>
+            form {
+                text-align: left;
+                margin: auto;
+                border: 3px solid green;
+                padding: 20px 20px;
+                width: 400px;
+                min-height: 100px;
+                height: auto;
+            }
+        </style>
+    </head>
+
+    <div>
+        <h1 style="text-align: center; padding-bottom: 20px; padding-top: 20px;"> Your Profile</h1>
+    </div>
+
+    <form>
+
+        <label for="email">Email:</label><br><br>
+        <label for="building">Building:</label><br><br>
+        <label for="roomNumber">Room Number:</label><br><br>
+        <label for="status">Status:</label><br><br>
+        <label for="gender">Gender:</label><br><br>
+        <label for="standing">Standing:</label><br><br>
+        
+    </form>
+
+    <div style="text-align: center; padding-top: 30px;">
+        <button onclick = "goHome()", style="text-align: center; margin: auto; display: inline; width: 70px; height: 40px;">
+            Home
+        </button>
+        <button onclick = "editData()", style="text-align: center; margin: auto; display: inline; margin-left: 100px; width: 100px; height: 40px;">
+            Edit Profile
+        </button>
+    </div>
+
+    <script type="text/javascript">
+        function goHome() {
+            location.href = 'http://localhost:8080/Home/';
+            return false;
+        }
+        function editData() {
+            //location.href = '';
+            return false;
+        }
+    </script>
+</div>
