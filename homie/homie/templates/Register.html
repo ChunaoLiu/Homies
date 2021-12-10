@@ -38,7 +38,7 @@
         
         <script type="text/javascript">
             function redirect_signup() {
-                location.href = "http://localhost:8080/signup/";
+                location.href = "http://34.134.110.35:8080/signup/";
             }
     
             function login() {
@@ -54,7 +54,7 @@
                     body: raw,
                     redirect: 'follow'
                 };
-                const url = "http://localhost:8000/Users/"
+                const url = "http://34.134.110.35:8000/Users/"
                 fetch(url, requestOptions).then(response => response.text())
             }
         </script>

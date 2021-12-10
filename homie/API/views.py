@@ -31,10 +31,6 @@ class AllUserList(APIView):
         return Response(Serializer.data)
     
 
-
-@permission_classes((AllowAny,))
-@authentication_classes([TokenAuthentication])
-@transaction.atomic()
 class SignupAPI(APIView):
     def post(self, request):
         print(request.data)
@@ -46,27 +42,30 @@ class SignupAPI(APIView):
         New_email = request.data['email']
         New_age = request.data['age']
         New_gender = request.data['gender']
-
-        exist_obj = User.objects.get(email=New_email)
-        if (exist_obj != None):
-            return_data['error_code'] = 1
+        try:
+            exist_obj = User.objects.get(email=New_email)
+        except:
+            if (New_email != '' and New_password != '' and New_name != '' and New_gender != '' and New_age != ''):
+                userModel = get_user_model()
+                user_auth = userModel.objects.create_user(username=New_name, password=New_password)
+                user_auth.save()
+                new_User = User.objects.create(name=New_name, password=New_password, email=New_email, age=New_age, gender=New_gender, pk=user_auth.pk)
+                new_User.save()
+                return_data['error_code'] = 0
+                response = HttpResponse(json.dumps(return_data),
+                                        content_type='application/json', status=status.HTTP_201_CREATED)
+                return response
+            return_data['error_code'] = 2
             response = HttpResponse(json.dumps(return_data),
-                                    content_type='application/json', status=status.HTTP_409_CONFLICT)
+                                        content_type='application/json', status=status.HTTP_400_BAD_REQUEST)
             return response
-
-        if (New_email != None and New_password != None and New_name != None and New_gender != None and New_age != None):
-            userModel = get_user_model()
-            user_auth = userModel.objects.create_user(username=New_name, password=New_password)
-            user_auth.save()
-            new_User = User.objects.create(name=New_name, password=New_password, email=New_email, age=New_age, gender=New_gender, pk=user_auth.pk)
-            new_User.save()
-            return_data['error_code'] = 0
-            response = HttpResponse(json.dumps(return_data),
-                                    content_type='application/json', status=status.HTTP_201_CREATED)
-            return response
-        return_data['error_code'] = 2
+        
+        return_data['error_code'] = 1
         response = HttpResponse(json.dumps(return_data),
-                                    content_type='application/json', status=status.HTTP_400_BAD_REQUEST)
+                                content_type='application/json', status=status.HTTP_409_CONFLICT)
+        return response
+
+        
         return response
 
 @permission_classes((AllowAny,))

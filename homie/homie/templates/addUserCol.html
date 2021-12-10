@@ -52,7 +52,7 @@
         
         <script type="text/javascript">
             function redirect_login() {
-                location.href = "http://localhost:8080/homepage/";
+                location.href = "http://34.134.110.35:8080/homepage/";
             }
     
             function signup() {
@@ -71,7 +71,7 @@
                     body: raw,
                     redirect: 'follow'
                 };
-                const url = "http://localhost:8080/SignupAPI/"
+                const url = "http://34.134.110.35:8080/SignupAPI/"
                 fetch(url, requestOptions)
                 .then(response => response.json())
                 .then(data => {
