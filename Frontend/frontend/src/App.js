@@ -51,8 +51,6 @@ function App() {
       <Main/>
       <header>
       </header>
-      <introFormat/>
-      <h1> Shit </h1>
     </div>
   );
 }

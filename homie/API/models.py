@@ -41,11 +41,11 @@ class Unit(models.Model):
 
 class User(models.Model):
     uid = models.AutoField(primary_key=True)
-    name = models.CharField(max_length=25, default="Bruh")
-    email = models.EmailField(default="No_EMAIL")
-    standing = models.CharField(max_length=25)
-    age = models.IntegerField(null=True)
-    gender = models.CharField(max_length=15, null=True)
+    name = models.CharField(max_length=25, default="Bruh", unique=False)
+    email = models.EmailField(default="No_EMAIL", unique=True)
+    standing = models.CharField(max_length=25, unique=False)
+    age = models.IntegerField(null=True, unique=False)
+    gender = models.CharField(max_length=15, null=True, unique=False)
     RA_id = models.IntegerField(unique=True, null=True)
     Unit_id = models.ForeignKey(to='API.Unit', on_delete=models.SET_NULL, null=True)
     password = models.IntegerField(default=12345)

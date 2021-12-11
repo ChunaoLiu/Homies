@@ -47,7 +47,7 @@ class SignupAPI(APIView):
         except:
             if (New_email != '' and New_password != '' and New_name != '' and New_gender != '' and New_age != ''):
                 userModel = get_user_model()
-                user_auth = userModel.objects.create_user(username=New_name, password=New_password)
+                user_auth = userModel.objects.create_user(username=New_email, password=New_password)
                 user_auth.save()
                 new_User = User.objects.create(name=New_name, password=New_password, email=New_email, age=New_age, gender=New_gender, pk=user_auth.pk)
                 new_User.save()
@@ -65,9 +65,6 @@ class SignupAPI(APIView):
                                 content_type='application/json', status=status.HTTP_409_CONFLICT)
         return response
 
-        
-        return response
-
 @permission_classes((AllowAny,))
 @authentication_classes([TokenAuthentication])
 @transaction.atomic()
@@ -80,7 +77,19 @@ class UserLogIn(APIView):
         Login_email = request.data['email']
         Login_password = request.data['password']
 
-        exist_obj = User.objects.get()
+        try:
+            exist_obj = User.objects.get(email=Login_email, password=Login_password)
+        except:
+            return_data['error_code'] = 1
+            response = HttpResponse(json.dumps(return_data),
+                                content_type='application/json', status=status.HTTP_401_UNAUTHORIZED)
+            return response
+        
+        return_data['error_code'] = 0
+        response = HttpResponse(json.dumps(return_data),
+                            content_type='application/json', status=status.HTTP_200_OK)
+        return response
+        
 
 class DeleteUserByID(APIView):
     def delete(self, request, uid):
