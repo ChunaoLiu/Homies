@@ -1,0 +1,83 @@
+<html>
+    <head>
+        <style>
+            .vertical-menu {
+                padding-left: 200px;
+                width: 200px;
+                flex: 0.2;
+            }
+
+            .vertical-menu a {
+                background-color: #eee; /* Grey background color */
+                color: black; /* Black text color */
+                display: block; /* Make the links appear below each other */
+                padding: 12px; /* Add some padding */
+                text-decoration: none; /* Remove underline from links */
+            }
+
+            .vertical-menu a:hover {
+                background-color: #ccc; /* Dark grey background on mouse-over */
+            }
+
+            .vertical-menu a.active {
+                background-color: #04AA6D; /* Add a green color to the "active/current" link */
+                color: white;
+            }
+        </style>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    </head>
+    <body onload="init()">
+        <div style="text-align: left; display: flex;">
+            <div class="vertical-menu">
+                <a href="homePage.html" class="active">Home</a>
+                <a href="ResidentPage.html">Resident Info</a>
+                <a href="Leasing.html">Leasing</a>
+                <a href="Event.html">Event</a>
+                <a href="RA_panel.html">Resident Assisstant</a>
+                <a href="Logout.html">Log out</a>
+            </div>
+            <hr style="width: 1px; height: 20px; flex: 0.0001; padding-left: 20px;">
+            <div style="flex: 1; padding-left: 50px; padding-right: 40px; width: 300px; text-align: left;">
+                <h1 style="text-align: left; flex: 1;", id="nameLabel">Welcome, stranger!</h1>
+            </div>
+        </div>
+    </body>
+
+
+    <script type="text/javascript">
+        function init() {
+            console.log(window.localStorage.getItem('email'))
+            if (window.localStorage.getItem('status') == null) {
+                location.href = "http://34.134.110.35:8080/login/"
+            }
+            var Useremail = window.localStorage.getItem('email');
+            var myHeaders = new Headers();
+                myHeaders.append("Content-Type", "application/json");
+                var raw = JSON.stringify({
+                    "email": Useremail
+                });
+                var requestOptions = {
+                    method: 'POST',
+                    headers: myHeaders,
+                    body: raw,
+                    redirect: 'follow'
+                };
+                const url = "http://34.134.110.35:8080/getNameViaEmail/"
+                fetch(url, requestOptions)
+                .then(response => response.json())
+                .then(data => {
+                    console.log(data);
+                    switch (data['error_code']) {
+                        case 0:
+                            var userName = data['name'];
+                            document.getElementById('nameLabel').innerHTML = "Welcome back, " + userName;
+                            console.log("get name successful! User should be " + userName);
+                            break;
+                        case 1:
+                            window.alert("Error: Email does not exist!");
+                            break;
+                    }
+                });
+        }
+    </script>
+</html>

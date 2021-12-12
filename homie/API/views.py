@@ -99,6 +99,32 @@ class DeleteUserByID(APIView):
             return Response(status=status.HTTP_404_NOT_FOUND)
         target.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+@api_view(http_method_names=['POST'])
+@permission_classes((AllowAny,))
+@authentication_classes([TokenAuthentication])
+@transaction.atomic()
+def getNameViaEmail(request):
+    print(request.data)
+
+    return_data = {}
+
+    email = request.data['email']
+
+    try:
+        exist_obj = User.objects.get(email=email)
+    except:
+        return_data['error_code'] = 1
+        response = HttpResponse(json.dumps(return_data),
+                            content_type='application/json', status=status.HTTP_404_NOT_FOUND)
+        return response
+    
+    return_data['error_code'] = 0
+    return_data['name'] = exist_obj.name
+    response = HttpResponse(json.dumps(return_data),
+                            content_type='application/json', status=status.HTTP_200_OK)
+    return response
+
     
 def index(request):
     template = loader.get_template('index.html')
@@ -110,4 +136,8 @@ def signup(request):
 
 def test(request):
     template = loader.get_template('testing.html')
+    return HttpResponse(template.render({}, request))
+
+def homePage(request):
+    template = loader.get_template('homePage.html')
     return HttpResponse(template.render({}, request))
