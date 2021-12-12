@@ -79,6 +79,10 @@
                     switch (data['error_code']) {
                         case 0:
                             window.alert("Registration successful! Redirecting to the home page now...");
+                            jQuery(window).load(function() {
+                                localStorage.setItem('status', 'loggedIn');
+                                localStorage.setItem('email', document.getElementById("Useremail").value);
+                            });
                             break;
                         case 1:
                             window.alert("Error: Email already taken!");

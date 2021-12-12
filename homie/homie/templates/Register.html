@@ -1,6 +1,7 @@
 <html>
     <div>
         <head>
+            <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
             <style>
                 form {
                     text-align: center;
@@ -45,8 +46,8 @@
                 var myHeaders = new Headers();
                 myHeaders.append("Content-Type", "application/json");
                 var raw = JSON.stringify({
-                    "name": document.getElementById("Username").value,
-                    "email": document.getElementById("Useremail").value
+                    "email": document.getElementById("Useremail").value,
+                    "password": document.getElementById("Userpassword").value
                 });
                 var requestOptions = {
                     method: 'POST',
@@ -54,8 +55,23 @@
                     body: raw,
                     redirect: 'follow'
                 };
-                const url = "http://34.134.110.35:8080/Users/"
-                fetch(url, requestOptions).then(response => response.text())
+                const url = "http://34.134.110.35:8080/LoginAPI/"
+                fetch(url, requestOptions)
+                .then(response => response.json())
+                .then(data => {
+                    console.log(data);
+                    switch (data['error_code']) {
+                        case 0:
+                            window.alert("Login successful! Redirecting to the home page now...");
+                            window.localStorage.setItem('status', 'loggedIn');
+                            window.localStorage.setItem('email', document.getElementById("Useremail").value);
+                            window.console.log("status is: " + window.localStorage.getItem('status'));
+                            break;
+                        case 1:
+                            window.alert("Error: Login failed! Please verify your information");
+                            break;
+                    }
+                });
             }
         </script>
     </div>

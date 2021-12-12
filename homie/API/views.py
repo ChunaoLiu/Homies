@@ -14,6 +14,7 @@ from django.template import loader
 from django.shortcuts import render
 import json
 from django.http import JsonResponse
+from django.db import transaction
 
 from django.contrib.auth import authenticate, login, logout, get_user_model
 from rest_framework.authentication import TokenAuthentication, BasicAuthentication
@@ -65,30 +66,30 @@ class SignupAPI(APIView):
                                 content_type='application/json', status=status.HTTP_409_CONFLICT)
         return response
 
+@api_view(http_method_names=['POST'])
 @permission_classes((AllowAny,))
 @authentication_classes([TokenAuthentication])
 @transaction.atomic()
-class UserLogIn(APIView):
-    def post(self, request):
-        print(request.data)
+def UserLogIn(request):
+    print(request.data)
 
-        return_data = {}
+    return_data = {}
 
-        Login_email = request.data['email']
-        Login_password = request.data['password']
+    Login_email = request.data['email']
+    Login_password = request.data['password']
 
-        try:
-            exist_obj = User.objects.get(email=Login_email, password=Login_password)
-        except:
-            return_data['error_code'] = 1
-            response = HttpResponse(json.dumps(return_data),
-                                content_type='application/json', status=status.HTTP_401_UNAUTHORIZED)
-            return response
-        
-        return_data['error_code'] = 0
+    try:
+        exist_obj = User.objects.get(email=Login_email, password=Login_password)
+    except:
+        return_data['error_code'] = 1
         response = HttpResponse(json.dumps(return_data),
-                            content_type='application/json', status=status.HTTP_200_OK)
+                            content_type='application/json', status=status.HTTP_401_UNAUTHORIZED)
         return response
+    
+    return_data['error_code'] = 0
+    response = HttpResponse(json.dumps(return_data),
+                        content_type='application/json', status=status.HTTP_200_OK)
+    return response
         
 
 class DeleteUserByID(APIView):
@@ -105,4 +106,8 @@ def index(request):
 
 def signup(request):
     template = loader.get_template('addUserCol.html')
+    return HttpResponse(template.render({}, request))
+
+def test(request):
+    template = loader.get_template('testing.html')
     return HttpResponse(template.render({}, request))

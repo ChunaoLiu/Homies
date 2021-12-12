@@ -1,0 +1,22 @@
+<html>
+    <head>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    </head>
+
+    <div style="text-align: center; padding-top: 30px;">
+        <button onclick="testing()", style="text-align: center; margin: auto; display: inline; width: 70px; height: 40px;">
+            Login
+        </button>
+    </div>
+
+    <script type="text/javascript">
+        function testing() {
+            console.log('testing!');
+            if (window.localStorage.getItem('status') != null) {
+                window.console.log("current user is: " + window.localStorage.getItem('email'));
+            } else {
+                window.console.log("status is: " + window.localStorage.getItem('status'));
+            }
+        }
+    </script>
+</html>
