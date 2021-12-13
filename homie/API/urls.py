@@ -11,4 +11,5 @@ urlpatterns = [
     path('homepage/', homePage, name="Homepage"),
     path('getNameViaEmail/', getNameViaEmail, name="getNameViaEmail"),
     path('testing/', test, name="test"),
+    path('getNumResident/', getTotalNumPeople, name="getTotalNumPeople"),
 ]

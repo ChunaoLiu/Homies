@@ -48,7 +48,7 @@ class User(models.Model):
     gender = models.CharField(max_length=15, null=True, unique=False)
     RA_id = models.IntegerField(unique=True, null=True)
     Unit_id = models.ForeignKey(to='API.Unit', on_delete=models.SET_NULL, null=True)
-    password = models.IntegerField(default=12345)
+    password = models.CharField(max_length = 25, default=12345)
     class meta():
         db_table = 'User'
         ordering = ['uid', 'name', 'email', 'RA_id', 'Unit_id']

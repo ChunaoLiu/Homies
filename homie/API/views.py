@@ -23,6 +23,7 @@ from rest_framework.decorators import APIView, permission_classes, authenticatio
 from rest_framework.permissions import IsAuthenticated, AllowAny
 
 from django.db import transaction
+from django.db import connection
 
 # Create your views here.
 class AllUserList(APIView):
@@ -124,6 +125,18 @@ def getNameViaEmail(request):
     response = HttpResponse(json.dumps(return_data),
                             content_type='application/json', status=status.HTTP_200_OK)
     return response
+
+@api_view(http_method_names=['GET'])
+@permission_classes((AllowAny,))
+def getTotalNumPeople(request):
+    return_data = {}
+
+    num_ppl = User.objects.raw('SELECT uid, COUNT(*) FROM API_user GROUP BY uid;')
+    print(num_ppl)
+    print(len(list(num_ppl)))
+    return_data['output'] = len(list(num_ppl))
+    return HttpResponse(json.dumps(return_data),
+                            content_type='application/json', status=status.HTTP_200_OK)
 
     
 def index(request):
