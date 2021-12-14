@@ -76,3 +76,20 @@ class Lease(models.Model):
 
     def __str__(self):
         return self.name
+
+class Event(models.Model):
+    Event_id = models.AutoField(primary_key=True)
+    Event_name = models.CharField(max_length=25)
+    Description = models.CharField(max_length=50)
+    Dorm_id = models.ForeignKey(to='API.Dorm', on_delete=models.SET_NULL, null=True)
+    Date = models.CharField(max_length=10)
+
+    def __str__(self):
+        return self.name
+
+class EventRel(models.Model):
+    uid = models.ForeignKey(to='API.User', on_delete=models.SET_NULL, null=True)
+    Event_id = models.ForeignKey(to='API.Event', on_delete=models.SET_NULL, null=True)
+
+    def __str__(self):
+        return self.name

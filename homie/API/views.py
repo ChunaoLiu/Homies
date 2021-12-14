@@ -6,7 +6,7 @@ from django.db.models.query import QuerySet
 from django.shortcuts import render, HttpResponse
 from .serializer import UserSerializer
 from django.http import JsonResponse
-from .models import User
+from .models import User, Lease
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.decorators import APIView
