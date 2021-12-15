@@ -11,4 +11,11 @@ urlpatterns = [
     path('homepage/', homePage, name="Homepage"),
     path('getNameViaEmail/', getNameViaEmail, name="getNameViaEmail"),
     path('testing/', test, name="test"),
+    path('leasing/', leasing, name="leasing"),
+    path('NewLeaseAPI/', NewLeaseAPI, name="NewLeaseAPI"),
+    path('viewlease/', viewlease, name="viewlease"),
+    path('messages/', messages, name="messages"),
+    path('MessageAPI/', MessageAPI, name="MessageAPI"),
+    path('viewInbox/', viewInbox, name="viewInbox"),
+    path('viewOutbox/', viewOutbox, name="viewOutbox"),
 ]

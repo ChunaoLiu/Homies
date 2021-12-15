@@ -1,0 +1,123 @@
+<html>
+	<div>
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+	</div>
+	
+	<div>
+		<h1 style="text-align: center; padding-top: 20px;">New Message</h1>
+
+	<form>
+		<label for="recipient">To (email):</label><br>
+		<input type='text', id="recipient", name="recipient"><br>
+		<label for="content">Message Body:</label><br>
+		<input type='text', id="content", name="content"><br>
+	</form>
+	<div style="text-align: center; padding-top: 30px;">
+		<button onclick="send()", style="text-align: center; margin: auto; width: 50px; height: 40px;">send</button><br>
+		<button onclick="getInbox()", style="text-align: center; margin: auto; width: 50px; height: 40px;">inbox</button><br>
+		<button onclick="getOutbox()", style="text-align: center; margin: auto; width: 50px; height: 40px;">outbox</button><br>
+		<button onclick="homepage()", style="text-align: center; margin: auto; width: 50px; height: 40px;">home</button><br>
+	</div>
+
+	<div id="info">
+		Click one of the buttons above to get your inbox or outbox!
+	</div>
+
+
+
+	<script type="text/javascript">
+		function homepage() {
+			location.href = "http://localhost:8080/homepage/";
+		}
+
+		function send() {
+			var header = new Headers();
+			header.append("Content-Type", "application/json");
+			var raw = JSON.stringify({
+				"email": window.localStorage.getItem('email'),
+				"recipient": document.getElementById("recipient").value,
+				"content": document.getElementById("content").value
+			});
+			var requestOptions = {
+				method: 'POST',
+				headers: header,
+				body: raw,
+				redirect: 'follow'
+			};
+			const url = "http://localhost:8080/MessageAPI/";
+			fetch(url, requestOptions)
+				.then(response=>response.json())
+				.then(data=>{
+					console.log(data);
+					switch (data['error_code']) {
+						case 0:
+							window.alert("Message sent!");
+							break;
+						case 1:
+							window.alert("Message failed.");
+							break;
+					}
+				});
+		}
+
+		function getInbox() {
+			var header = new Headers();
+			header.append("Content-Type", "application/json");
+			var raw = JSON.stringify({
+				"email": window.localStorage.getItem('email')
+			});
+			var requestOptions = {
+				method: 'POST',
+				headers: header,
+				body: raw,
+				redirect: 'follow'
+			};
+			const url = "http://localhost:8080/viewInbox/";
+			fetch(url, requestOptions)
+				.then(response=>response.json())
+				.then(data=>{
+					console.log(data);
+					var x = document.getElementById("info");
+					if (data['error_code'] == 1) {
+						x.innerHTML = "No messages found in inbox";
+					} else {
+						var txt = "Viewing inbox:<br>";
+						for (let c = 0; c < data.length; c++) {
+							txt += "From: " + data[c].from + "| " + data[c].body + "<br>";
+						}
+						x.innerHTML = txt;
+					}
+				});
+		}
+		function getOutbox() {
+			var header = new Headers();
+			header.append("Content-Type", "application/json");
+			var raw = JSON.stringify({
+				"email": window.localStorage.getItem('email')
+			});
+			var requestOptions = {
+				method: 'POST',
+				headers: header,
+				body: raw,
+				redirect: 'follow'
+			};
+			const url = "http://localhost:8080/viewOutbox/";
+			fetch(url, requestOptions)
+				.then(response=>response.json())
+				.then(data=>{
+					console.log(data);
+					var x = document.getElementById("info");
+					if (data['error_code'] == 1) {
+						x.innerHTML = "No messages found in outbox";
+					} else {
+						var txt = "Viewing outbox:<br>";
+						for (let c = 0; c < data.length; c++) {
+							txt += "To: " + data[c].to + "| " + data[c].body + "<br>";
+						}
+						x.innerHTML = txt;
+					}
+				});
+		}
+
+	</script>
+</html>
