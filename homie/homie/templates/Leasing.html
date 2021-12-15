@@ -1,0 +1,113 @@
+<html>
+	<head>
+		<style>
+			
+		</style>
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+	</head>
+	<body onload="init()">
+		<div style="text-align: left; display: flex;">
+			<div style="flex: 1; padding-left: 50px; padding-right: 40px; width: 300px; text-align: center;">
+				<h1 style="text-align: left; flex: 1", id="nameLabel">Leasing</h1>
+			</div>
+		</div>
+	</body>
+
+	<form>
+		<label for="type">Lease Type:</label>
+		<select name="type" id="type">
+			<option value="Basic">Basic</option>
+			<option value="Meals">Basic With Meals</option>
+			<option value="Deluxe">Deluxe</option>
+		</select>
+		<label for="start">Start Date:</label>
+		<input type="date" id="start" name="start" value="1970-01-01" min="1970-01-01" max="2069-12-31">
+		<label for="end">End Date:</label>
+		<input type="date" id="end" name="end" value="2069-12-31" min="1970-01-01" max="2069-12-31">
+	</form>
+	<div style="text-align: center; padding-top: 30px;">
+		<button onclick="NewLease()", style="text-align: center; margin: auto; display: inline; margin-left: 100px; width: 100px; height: 40px;">Create Lease</button><br>
+		<button onclick="GetLease()", style="text-align: center; margin: auto; display: inline; margin-left: 100px; width: 100px; height: 40px;">Load My Lease</button><br>
+		<button onclick="Homepage()", style="text-align: center; margin: auto; display: inline; margin-left: 100px; width: 100px; height: 40px;">Return to Homepage</button><br>
+	</div>
+
+	<label id = "info">
+		Lease information not loaded
+	</label>
+
+	<script type="text/javascript">
+		function Homepage() {
+			location.href = "http://34.134.110.35:8080/homepage/";
+		}
+		
+		function NewLease() {
+			var header = new Headers();
+			header.append("Content-Type", "application/json");
+			var raw = JSON.stringify({
+				"lease_type": document.getElementById("type").value,
+				"start_date": document.getElementById("start").value,
+				"end_date": document.getElementById("end").value,
+				"user_email": window.localStorage.getItem('email')
+			});
+			var requestOptions = {
+				method: 'POST',
+				headers: header,
+				body: raw,
+				redirect: 'follow;
+			const url = "http://34.134.110.35:8080/NewLeaseAPI/";
+			fetch(url, requestOptions)
+				.then(response=>response.json())
+				.then(data => {
+					console.log(data);
+					switch (data['error_code']) {
+						case 0:
+							window.alert("Lease successfully created!");
+							//window.localStorage.setItem('lease', data['unit_id']);
+							//window.localStorage.setItem('lease_type', document.getElementById("type"));
+							//window.localStorage.setItem('lease_start', document.getElementById("start"));
+							//window.localStorage.setItem('lease_end', document.getElementById("end"));
+							break;
+						case 1:
+							window.alert("Error. Failed to create lease.");
+							break;
+					}
+				
+				});
+		}
+		
+		function GetLease() {
+			console.log("started getting lease\n");
+			var header = new Headers();
+			header.append("Content-Type", "application/json");
+			var raw = JSON.stringify({
+				"email": window.localStorage.getItem('email')
+			});
+			var requestOptions = {
+				method: 'POST',
+				headers: header,
+				body: raw,
+				redirect: 'follow'
+			};
+			const url = "http://34.134.110.35:8080/viewlease/";
+			console.log("fetching\n");
+			fetch(url, requestOptions)
+				.then(response=>response.json())
+				.then(data=>{
+					console.log(data);
+					switch (data['error_code']) {
+						case 0:
+							var x = document.getElementById("info");
+							var text = "You have a " + data['type'] + " lease in unit " + data['unit'] + " from " + data['start'] + " to " + data['end'];
+							console.log(text + "\n");
+							x.innerHTML = text;
+
+							break;
+						case 1:
+							window.alert("Error. Lease not found.");
+							break;
+
+					}
+				});
+		}
+	</script>
+</html>

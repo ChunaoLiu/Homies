@@ -73,6 +73,33 @@ class Lease(models.Model):
     start_date = models.DateField(auto_now_add=True)
     end_date = models.DateField(auto_now=True, null=True)
     User_id = models.OneToOneField(to=User, on_delete=models.CASCADE)
+    Unit_id = models.ForeignKey(to='API.Unit', on_delete=models.SET_NULL, null=True)
+
+    class meta():
+        db_table = 'Lease'
+        ordering = ['Lease_id', 'User_id', 'lease_type', 'start_date', 'end_date']
+
+    def save(self, *args, **kwargs):
+        if self._state.adding:
+            last_unit = Lease.objects.all.aggregate(largest=models.Max('Unit_id'))['largest']
+            if last_unit is not None:
+                self.unit_id = last_unit + 1
+        super (Lease, self).save(*args, **kwargs)
+
+
+
+class Message(models.Model):
+    msg_id = models.AutoField(primary_key=True)
+    to = models.ForeignKey(to=User, related_name="recipient", on_delete=models.SET_NULL, null=True)
+    fr = models.ForeignKey(to=User, related_name="sender", on_delete=models.SET_NULL, null=True)
+    content = models.CharField(max_length=256, default="Hi there!")
+
+    class meta():
+        db_table = 'Message'
+        ordering = ['msg_id', 'to', 'fr', 'content']
+
+    def save(self, *args, **kwargs):
+        super (Message, self).save(*args, **kwargs)
 
     def __str__(self):
         return self.name
@@ -100,14 +127,6 @@ class ResidentAssistant(models.Model):
     Title = models.CharField(max_length=20, default="Basic RA")
     Description = models.CharField(max_length=60, default="Basic RA duties: roam around the halls")
 
-# Inactive
-class Message(models.Model):
-    Msg_id = models.AutoField(primary_key=True)
-    Sender = models.ForeignKey(to=User, on_delete=models.CASCADE, related_name='Sender')
-    Receiver = models.ForeignKey(to=User, on_delete=models.CASCADE, related_name='Receiver')
-    message = models.CharField(max_length=255, null=False)
-    time = models.DateTimeField(auto_now_add=True)
-
 class WorkOrder(models.Model):
     Work_id = models.AutoField(primary_key=True)
     Submitter = models.ForeignKey(to=User, on_delete=models.DO_NOTHING, related_name='Submitter', null=False)
@@ -117,3 +136,4 @@ class WorkOrder(models.Model):
     Submit_time = models.DateField(auto_now=True)
     End_time = models.DateField(auto_now_add=True, null=True)
     status = models.BooleanField(default=False)
+

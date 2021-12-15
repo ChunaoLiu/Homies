@@ -23,6 +23,7 @@ from rest_framework.decorators import APIView, permission_classes, authenticatio
 from rest_framework.permissions import IsAuthenticated, AllowAny
 
 from django.db import transaction
+from django.core.serializers import serialize
 from django.db import connection
 
 # Create your views here.
@@ -66,6 +67,55 @@ class SignupAPI(APIView):
         response = HttpResponse(json.dumps(return_data),
                                 content_type='application/json', status=status.HTTP_409_CONFLICT)
         return response
+
+@api_view(http_method_names=['POST'])
+@permission_classes((AllowAny,))
+@authentication_classes([TokenAuthentication])
+@transaction.atomic()
+def NewLeaseAPI(request):
+    if request.method != 'POST':
+        return;
+    print(request.data)
+    return_data = {}
+
+    l_type = request.data['lease_type']
+    s_date = request.data['start_date']
+    e_date = request.data['end_date']
+    rid = getUIDViaEmail(request.data['user_email'])
+    try:
+        exist_obj = Lease.objects.get(User_id=rid)
+    except:
+        if (l_type != '' and s_date != '' and e_date != '' and rid != ''):
+            lease = Lease.objects.create(User_id_id=rid, lease_type=l_type, start_date=s_date, end_date=e_date)
+            lease.save()
+            return_data['error_code'] = 0
+            response = HttpResponse(json.dumps(return_data), content_type='application/json', status=status.HTTP_201_CREATED)
+            return response
+        return_data['error_code'] = 2
+        response = HttpResponse(json.dumps(return_data), content_type='application/json', status=status.HTTP_400_BAD_REQUEST)
+        return response
+    return_data['error_code'] = 1
+    response = HttpResponse(json.dumps(return_data), content_type='application/json', status=status.HTTP_409_CONFLICT)
+    return response
+
+@api_view(http_method_names=['POST'])
+@permission_classes((AllowAny,))
+@authentication_classes([TokenAuthentication])
+@transaction.atomic()
+def MessageAPI(request):
+    print(request.data)
+    return_data = {}
+
+    email_id = getUIDViaEmail(request.data['email'])
+    recipient_id = getUIDViaEmail(request.data['recipient'])
+    body = request.data['content']
+
+    msg = Message.objects.create(fr_id=email_id, to_id=recipient_id, content=body)
+    msg.save()
+    return_data['error_code'] = 0
+    response = HttpResponse(json.dumps(return_data), content_type='application/json', status=status.HTTP_201_CREATED)
+    return response
+
 
 @api_view(http_method_names=['POST'])
 @permission_classes((AllowAny,))
@@ -126,6 +176,25 @@ def getNameViaEmail(request):
                             content_type='application/json', status=status.HTTP_200_OK)
     return response
 
+
+
+def getUIDViaEmail(email):
+    return_data = {}
+
+    try:
+        exist_obj = User.objects.get(email=email)
+    except:
+        return
+    return exist_obj.uid
+
+def getEmailViaUID(uid):
+    try:
+        exist_obj = User.objects.get(uid=uid)
+    except:
+        return
+    return exist_obj.email
+
+
 @api_view(http_method_names=['GET'])
 @permission_classes((AllowAny,))
 def getTotalNumPeople(request):
@@ -171,72 +240,6 @@ def getRA_API(request):
     return HttpResponse(json.dumps(return_data),
                             content_type='application/json', status=status.HTTP_200_OK)
 
-@api_view(http_method_names=['POST'])
-@transaction.atomic()
-def postMessage(request):
-    print(request.data)
-
-    return_data = {}
-
-    senderEmail = request.data['senderEmail']
-    receiverEmail = request.data['receiverEmail']
-    msg = request.data['message']
-
-    try:
-        sender = User.objects.get(email=senderEmail)
-    except:
-        return_data['error_code'] = 1
-        return HttpResponse(json.dumps(return_data),
-                            content_type='application/json', status=status.HTTP_404_NOT_FOUND)
-    
-    try:
-        receiver = User.objects.get(email=receiverEmail)
-    except:
-        return_data['error_code'] = 2
-        return HttpResponse(json.dumps(return_data),
-                            content_type='application/json', status=status.HTTP_404_NOT_FOUND)
-
-    message = Message.objects.create(Sender=sender, Receiver=receiver, message=msg)
-    message.save()
-    return_data['error_code'] = 0
-    return HttpResponse(json.dumps(return_data),
-                            content_type='application/json', status=status.HTTP_200_OK)
-
-@api_view(http_method_names=['GET'])
-def getMessage(request):
-    print (request.data)
-
-    return_data = {}
-
-    getterEmail = request.data['email']
-
-    try:
-        user = User.objects.get(email=getterEmail)
-    except:
-        return_data['error_code'] = 1
-        return HttpResponse(json.dumps(return_data),
-                            content_type='application/json', status=status.HTTP_404_NOT_FOUND)
-    
-    all_sent_message = []
-    all_receiver_message = []
-    desired_format = '%Y-%m-%d %H:%M'
-
-    sent_message = Message.objects.filter(Sender=user)
-    for msg in sent_message:
-        message_info = [msg.Receiver.email, msg.Receiver.name, msg.message, msg.time.strftime(desired_format)]
-        all_sent_message.append(message_info)
-    
-    sent_message = Message.objects.filter(Receiver=user)
-    for msg in sent_message:
-        message_info = [msg.Sender.email, msg.Sender.name, msg.message, msg.time.strftime(desired_format)]
-        all_receiver_message.append(message_info)
-
-    return_data['all_sent_msg'] = all_sent_message
-    return_data['all_receover_message'] = all_receiver_message
-
-    return_data['error_code'] = 0
-    return HttpResponse(json.dumps(return_data),
-                            content_type='application/json', status=status.HTTP_200_OK)
 
 @api_view(http_method_names=['POST'])
 @transaction.atomic()
@@ -344,8 +347,72 @@ def homePage(request):
     template = loader.get_template('homePage.html')
     return HttpResponse(template.render({}, request))
 
-def sendMsgPanel(request):
-    template = loader.get_template('message.html')
+def leasing(request):
+    template = loader.get_template('Leasing.html')
+    return HttpResponse(template.render({}, request))
+
+@api_view(http_method_names=['POST'])
+def viewlease(request):
+    print(request.data)
+
+    return_data = {}
+
+    try:
+        exist_obj = Lease.objects.get(User_id=getUIDViaEmail(request.data['email']));
+    except:
+        return_data['error_code'] = 1
+        response = HttpResponse(json.dumps(return_data, default=str), content_type='application/json',status=status.HTTP_404_NOT_FOUND)
+        return response
+    return_data['error_code'] = 0
+    return_data['unit'] = exist_obj.Unit_id
+    return_data['type'] = exist_obj.lease_type
+    return_data['start'] = exist_obj.start_date
+    return_data['end'] = exist_obj.end_date
+    response = HttpResponse(json.dumps(return_data, default=str), content_type='application/json', status=status.HTTP_200_OK)
+    return response
+
+@api_view(http_method_names=['POST'])
+def viewInbox(request):
+    print(request.data)
+    return_data = {}
+
+    try:
+        inbox = Message.objects.get(to_id=getUIDViaEmail(request.data['email']))
+    except:
+        return_data['error_code'] = 1
+        response = HttpResponse(json.dumps(return_data), content_type='application/json', status=status.HTTP_404_NOT_FOUND)
+        return response
+
+    msg_list = []
+    for msg in inbox:
+        msg_list.append({'from': getEmailViaUID(msg.fr_id), 'body': msg.content})
+    
+    response = HttpResponse(json.dumps(msg_list), content_type='application/json', status=status.HTTP_200_OK)
+    return response
+
+@api_view(http_method_names=['POST'])
+def viewOutbox(request):
+    print(request.data)
+    return_data = {}
+
+    try:
+        outbox = Message.objects.filter(fr_id=getUIDViaEmail(request.data['email']))
+    except:
+        #print("Outbox not found\n")
+        return_data['error_code'] = 1
+        response = HttpResponse(json.dumps(return_data), content_type='application/json', status=status.HTTP_404_NOT_FOUND)
+        return response
+    #print("Outbox found successfully\n")
+    return_data['error_code'] = 0
+
+    msg_list = []
+    for msg in outbox:
+        msg_list.append({'to': getEmailViaUID(msg.to_id), 'body': msg.content})
+    response = HttpResponse(json.dumps(msg_list), content_type='application/json', status=status.HTTP_200_OK)
+    return response
+
+def messages(request):
+    template = loader.get_template('messages.html')
     return HttpResponse(template.render({}, request))
 
 def sendWorkOrderPanel(request):
@@ -359,3 +426,4 @@ def getOrder(request):
 def logout(request):
     template = loader.get_template('logout.html')
     return HttpResponse(template.render({}, request))
+
