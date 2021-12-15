@@ -35,7 +35,7 @@ class Unit(models.Model):
         ordering = ['Unit_id', 'num_ppl']
 
     def save(self, *args, **kwargs):
-        super(Dorm, self).save(*args, **kwargs)
+        super(Unit, self).save(*args, **kwargs)
         self.num_ppl += 1
 
 
@@ -93,3 +93,27 @@ class EventRel(models.Model):
 
     def __str__(self):
         return self.name
+
+class ResidentAssistant(models.Model):
+    RA_id = models.AutoField(primary_key=True)
+    RA_name = models.CharField(max_length = 40, unique=False)
+    Title = models.CharField(max_length=20, default="Basic RA")
+    Description = models.CharField(max_length=60, default="Basic RA duties: roam around the halls")
+
+# Inactive
+class Message(models.Model):
+    Msg_id = models.AutoField(primary_key=True)
+    Sender = models.ForeignKey(to=User, on_delete=models.CASCADE, related_name='Sender')
+    Receiver = models.ForeignKey(to=User, on_delete=models.CASCADE, related_name='Receiver')
+    message = models.CharField(max_length=255, null=False)
+    time = models.DateTimeField(auto_now_add=True)
+
+class WorkOrder(models.Model):
+    Work_id = models.AutoField(primary_key=True)
+    Submitter = models.ForeignKey(to=User, on_delete=models.DO_NOTHING, related_name='Submitter', null=False)
+    RA_assigned = models.ForeignKey(to=User, on_delete=models.DO_NOTHING, related_name='RA_assigned', null=True)
+    Building_requested = models.ForeignKey(to=Unit, on_delete=models.DO_NOTHING)
+    description = models.CharField(max_length=255, null=True)
+    Submit_time = models.DateField(auto_now=True)
+    End_time = models.DateField(auto_now_add=True, null=True)
+    status = models.BooleanField(default=False)

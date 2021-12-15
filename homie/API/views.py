@@ -6,7 +6,7 @@ from django.db.models.query import QuerySet
 from django.shortcuts import render, HttpResponse
 from .serializer import UserSerializer
 from django.http import JsonResponse
-from .models import User, Lease
+from .models import User, Lease, Message, Dorm, Unit, WorkOrder
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.decorators import APIView
@@ -31,7 +31,7 @@ class AllUserList(APIView):
         users = User.objects.all()
         Serializer = UserSerializer(users, many=True)
         return Response(Serializer.data)
-    
+
 
 class SignupAPI(APIView):
     def post(self, request):
@@ -91,7 +91,7 @@ def UserLogIn(request):
     response = HttpResponse(json.dumps(return_data),
                         content_type='application/json', status=status.HTTP_200_OK)
     return response
-        
+
 
 class DeleteUserByID(APIView):
     def delete(self, request, uid):
@@ -138,7 +138,163 @@ def getTotalNumPeople(request):
     return HttpResponse(json.dumps(return_data),
                             content_type='application/json', status=status.HTTP_200_OK)
 
+@api_view(http_method_names=['POST'])
+@transaction.atomic()
+def postMessage(request):
+    print(request.data)
+
+    return_data = {}
+
+    senderEmail = request.data['senderEmail']
+    receiverEmail = request.data['receiverEmail']
+    msg = request.data['message']
+
+    try:
+        sender = User.objects.get(email=senderEmail)
+    except:
+        return_data['error_code'] = 1
+        return HttpResponse(json.dumps(return_data),
+                            content_type='application/json', status=status.HTTP_404_NOT_FOUND)
     
+    try:
+        receiver = User.objects.get(email=receiverEmail)
+    except:
+        return_data['error_code'] = 2
+        return HttpResponse(json.dumps(return_data),
+                            content_type='application/json', status=status.HTTP_404_NOT_FOUND)
+
+    message = Message.objects.create(Sender=sender, Receiver=receiver, message=msg)
+    message.save()
+    return_data['error_code'] = 0
+    return HttpResponse(json.dumps(return_data),
+                            content_type='application/json', status=status.HTTP_200_OK)
+
+@api_view(http_method_names=['GET'])
+def getMessage(request):
+    print (request.data)
+
+    return_data = {}
+
+    getterEmail = request.data['email']
+
+    try:
+        user = User.objects.get(email=getterEmail)
+    except:
+        return_data['error_code'] = 1
+        return HttpResponse(json.dumps(return_data),
+                            content_type='application/json', status=status.HTTP_404_NOT_FOUND)
+    
+    all_sent_message = []
+    all_receiver_message = []
+    desired_format = '%Y-%m-%d %H:%M'
+
+    sent_message = Message.objects.filter(Sender=user)
+    for msg in sent_message:
+        message_info = [msg.Receiver.email, msg.Receiver.name, msg.message, msg.time.strftime(desired_format)]
+        all_sent_message.append(message_info)
+    
+    sent_message = Message.objects.filter(Receiver=user)
+    for msg in sent_message:
+        message_info = [msg.Sender.email, msg.Sender.name, msg.message, msg.time.strftime(desired_format)]
+        all_receiver_message.append(message_info)
+
+    return_data['all_sent_msg'] = all_sent_message
+    return_data['all_receover_message'] = all_receiver_message
+
+    return_data['error_code'] = 0
+    return HttpResponse(json.dumps(return_data),
+                            content_type='application/json', status=status.HTTP_200_OK)
+
+@api_view(http_method_names=['POST'])
+@transaction.atomic()
+def set_Unit(request):
+    print (request.data)
+
+    return_data = {}
+
+    try:
+        dorm = Dorm.objects.get(Dorm_id=1)
+    except:
+        return_data['error_code'] = 1
+        return HttpResponse(json.dumps(return_data),
+                            content_type='application/json', status=status.HTTP_404_NOT_FOUND)
+    
+    new_unit = Unit.objects.create(unit_name='A-123', num_ppl=0, max_ppl=4, has_kitchen=True, has_laundry=True, Dorm_id=dorm)
+    return_data['error_code'] = 0
+    return HttpResponse(json.dumps(return_data),
+                            content_type='application/json', status=status.HTTP_200_OK)
+
+@api_view(http_method_names=['POST'])
+@transaction.atomic()
+def order_add(request):
+    print (request.data)
+
+    return_data = {}
+
+    user_Email = request.data['email']
+    unit_id = request.data['unit_id']
+    description = request.data['description']
+
+    try:
+        unit = Unit.objects.get(Unit_id=unit_id)
+    except:
+        return_data['error_code'] = 1
+        return HttpResponse(json.dumps(return_data),
+                            content_type='application/json', status=status.HTTP_404_NOT_FOUND)
+
+    try:
+        user = User.objects.get(email=user_Email)
+    except:
+        return_data['error_code'] = 2
+        return HttpResponse(json.dumps(return_data),
+                            content_type='application/json', status=status.HTTP_404_NOT_FOUND) 
+    
+    new_order = WorkOrder.objects.create(Submitter = user, description=description, Building_requested=unit)
+    return_data['error_code'] = 0
+    return HttpResponse(json.dumps(return_data),
+                            content_type='application/json', status=status.HTTP_200_OK)
+
+@api_view(http_method_names=['POST'])
+def getOrder_API(request):
+    print (request.data)
+
+    return_data = {}
+
+    getterEmail = request.data['email']
+
+    try:
+        user = User.objects.get(email=getterEmail)
+    except:
+        return_data['error_code'] = 1
+        return HttpResponse(json.dumps(return_data),
+                            content_type='application/json', status=status.HTTP_404_NOT_FOUND)
+    
+    all_order = []
+    desired_format = '%Y-%m-%d'
+    
+    orders = WorkOrder.objects.filter(Submitter=user)
+    for order in orders:
+        if (order.RA_assigned is None):
+            Ra = 'Not Assigned Yet'
+        else:
+            Ra = order.RA_assigned.name
+
+        if (order.status is False):
+            status_work='In Progress'
+            End_time = 'In Progress'
+        else:
+            status_work='Done'
+            End_time = order.End_time.strftime(desired_format)
+        order_info = [order.Submit_time.strftime(desired_format), End_time, order.description, Ra, status_work]
+        all_order.append(order_info)
+
+    return_data['all_orders'] = all_order
+
+    return_data['error_code'] = 0
+    return HttpResponse(json.dumps(return_data),
+                            content_type='application/json', status=status.HTTP_200_OK)
+
+
 def index(request):
     template = loader.get_template('index.html')
     return HttpResponse(template.render({}, request))
@@ -153,4 +309,16 @@ def test(request):
 
 def homePage(request):
     template = loader.get_template('homePage.html')
+    return HttpResponse(template.render({}, request))
+
+def sendMsgPanel(request):
+    template = loader.get_template('message.html')
+    return HttpResponse(template.render({}, request))
+
+def sendWorkOrderPanel(request):
+    template = loader.get_template('postOrder.html')
+    return HttpResponse(template.render({}, request))
+
+def getOrder(request):
+    template = loader.get_template('DisplayOrders.html')
     return HttpResponse(template.render({}, request))

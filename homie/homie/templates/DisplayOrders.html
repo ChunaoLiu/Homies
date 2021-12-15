@@ -1,0 +1,96 @@
+<html>
+    <head>
+        <style>
+            .order {
+                padding-top: 20px;
+                text-align: center;
+                size: 300px;
+            }
+        </style>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    </head>
+
+    <body onload="init()" id="body" style="text-align: center;">
+        <div>
+            <h2>All work orders:</h2>
+        </div>
+    </body>
+
+    <script type="text/javascript">
+        function init() {
+            var senderEmail = window.localStorage.getItem('email');
+            if (senderEmail == null) {
+                window.alert("Your login has expired. Please re-login");
+                location.href = "http://34.134.110.35:8080/login/";
+                return 0;
+            }
+
+            var myHeaders = new Headers();
+            myHeaders.append("Content-Type", "application/json");
+            var raw = JSON.stringify({
+                "email": senderEmail,
+            });
+            var requestOptions = {
+                method: 'POST',
+                headers: myHeaders,
+                body: raw,
+                redirect: 'follow'
+            };
+            const url = "http://34.134.110.35:8080/getOrder_API/"
+            fetch(url, requestOptions)
+            .then(response => response.json())
+            .then(data => {
+                console.log(data);
+                switch (data['error_code']) {
+                    case 0:
+                        
+                        for (let i = 0; i < data['all_orders'].length; i++) {
+                            var iDiv = document.createElement('div');
+                            iDiv.className = 'order';
+                            
+                            var workStartTimeTitle = document.createElement('label');
+                            workStartTimeTitle.innerHTML = "Work start date: ";
+                            iDiv.appendChild(workStartTimeTitle);
+                            var workStartTime = document.createElement('label');
+                            workStartTime.innerHTML = data['all_orders'][i][0] + "<br/ >";
+                            iDiv.appendChild(workStartTime);
+
+                            var workEndTimeTitle = document.createElement('label');
+                            workEndTimeTitle.innerHTML = "Work end date: ";
+                            iDiv.appendChild(workEndTimeTitle);
+                            var workEndTime = document.createElement('label');
+                            workEndTime.innerHTML = data['all_orders'][i][1] + "<br/ >";
+                            iDiv.appendChild(workEndTime);
+
+                            var workDescTitle = document.createElement('label');
+                            workDescTitle.innerHTML = "Description: ";
+                            iDiv.appendChild(workDescTitle);
+                            var workDescription = document.createElement('label');
+                            workDescription.innerHTML = data['all_orders'][i][2] + "<br/ >";
+                            iDiv.appendChild(workDescription);
+
+                            var workRATitle = document.createElement('label');
+                            workRATitle.innerHTML = "Assigned RA:";
+                            iDiv.appendChild(workRATitle);
+                            var workRA = document.createElement('label');
+                            workRA.innerHTML = data['all_orders'][i][3] + "<br/ >";
+                            iDiv.appendChild(workRA);
+
+                            var workStatusTitle = document.createElement('label');
+                            workStatusTitle.innerHTML = "Current Status:";
+                            iDiv.appendChild(workStatusTitle);
+                            var workStatus = document.createElement('label');
+                            workStatus.innerHTML = data['all_orders'][i][4] + "<br/ >";
+                            iDiv.appendChild(workStatus);
+
+                            document.getElementsByTagName('body')[0].appendChild(iDiv);
+                        }
+                        break;
+                    case 1:
+                        window.alert("Error: Sender Email does not exist! This must be a magic!");
+                        break;
+                }
+            });
+        }
+    </script>
+</html>
