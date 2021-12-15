@@ -40,7 +40,9 @@
                 <a href="Logout.html">Log out</a>
             </div>
             <div style="flex: 1; padding-left: 50px; padding-right: 40px; width: 300px; text-align: left;">
-                <h1 style="text-align: left; flex: 1;", id="nameLabel">Welcome, stranger!</h1>
+                <h1 style="text-align: left;", id="nameLabel"></h1><br />
+                <h3 style="text-align: left;", id="RALabel"></h1><br />
+                <h3 style="text-align: left;", id="UnitLabel"></h1><br />
             </div>
         </div>
     </body>
@@ -74,6 +76,44 @@
                             var userName = data['name'];
                             document.getElementById('nameLabel').innerHTML = "Welcome back, " + userName;
                             console.log("get name successful! User should be " + userName);
+                            break;
+                        case 1:
+                            window.alert("Error: Email does not exist!");
+                            break;
+                    }
+                });
+
+
+                myHeaders = new Headers();
+                myHeaders.append("Content-Type", "application/json");
+                var raw = JSON.stringify({
+                    "senderEmail": Useremail
+                });
+                var requestOptions = {
+                    method: 'POST',
+                    headers: myHeaders,
+                    body: raw,
+                    redirect: 'follow'
+                };
+                const url2 = "http://34.134.110.35:8080/getRA_API/"
+                fetch(url2, requestOptions)
+                .then(response => response.json())
+                .then(data => {
+                    console.log(data);
+                    switch (data['error_code']) {
+                        case 0:
+                            var is_RA = data['is_RA'];
+                            if (is_RA == false) {
+                                document.getElementById('RALabel').innerHTML = "You are a Resident Assisstance. You can use the RA panel!";
+                            } else {
+                                document.getElementById('RALabel').innerHTML = "You are a regular resident. You can not use the RA panel!";
+                            }
+                            var unit = data['unit'];
+                            if (unit == false) {
+                                document.getElementById('UnitLabel').innerHTML = "You are currently not living in the apartment. Maybe sign a lease?";
+                            } else {
+                                document.getElementById('UnitLabel').innerHTML = "You are currently living in unit number: " + unit;
+                            }
                             break;
                         case 1:
                             window.alert("Error: Email does not exist!");

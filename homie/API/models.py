@@ -47,7 +47,7 @@ class User(models.Model):
     age = models.IntegerField(null=True, unique=False)
     gender = models.CharField(max_length=15, null=True, unique=False)
     RA_id = models.IntegerField(unique=True, null=True)
-    Unit_id = models.ForeignKey(to='API.Unit', on_delete=models.SET_NULL, null=True)
+    Unit_id = models.ForeignKey(to=Unit, on_delete=models.SET_NULL, null=True)
     password = models.CharField(max_length = 25, default=12345)
     class meta():
         db_table = 'User'

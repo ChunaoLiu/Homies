@@ -139,6 +139,39 @@ def getTotalNumPeople(request):
                             content_type='application/json', status=status.HTTP_200_OK)
 
 @api_view(http_method_names=['POST'])
+@permission_classes((AllowAny,))
+def getRA_API(request):
+    return_data = {}
+    senderEmail = request.data['senderEmail']
+    
+    user = User.objects.raw('SELECT uid from API_user WHERE email=\'' + senderEmail + '\';')
+    for p in user:
+        if p.uid == None:
+            return_data['error_code'] = 1
+            return HttpResponse(json.dumps(return_data),
+                            content_type='application/json', status=status.HTTP_404_NOT_FOUND)
+
+    RA = User.objects.raw('SELECT uid, RA_id as RA from API_user WHERE email=\'' + senderEmail + '\';')
+    for p in RA:
+        if (p.RA is None):
+            return_data['is_RA'] = False
+        else:
+            return_data['is_RA'] = True
+    
+    Res = User.objects.raw('SELECT uid, Unit_id_id as unit FROM API_user WHERE email=\'' + senderEmail + '\';')
+    for p in Res:
+        if (p.unit is None):
+            return_data['unit'] = False
+        else:
+            unit = Unit.objects.raw('SELECT Unit_id, unit_name FROM API_unit WHERE Unit_id=\'' + p.unit + '\';')
+            for s in unit:
+                return_data['unit'] = s.unit_name
+                
+    return_data['error_code'] = 0        
+    return HttpResponse(json.dumps(return_data),
+                            content_type='application/json', status=status.HTTP_200_OK)
+
+@api_view(http_method_names=['POST'])
 @transaction.atomic()
 def postMessage(request):
     print(request.data)

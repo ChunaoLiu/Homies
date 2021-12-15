@@ -10,7 +10,7 @@ urlpatterns = [
     path('deleteUserByID/<int:uid>', DeleteUserByID.as_view()),
     path('homepage/', homePage, name="Homepage"),
     path('getNameViaEmail/', getNameViaEmail, name="getNameViaEmail"),
-    path('testing/', test, name="test"),
+    path('getRA_API/', getRA_API, name="test"),
     path('getNumResident/', getTotalNumPeople, name="getTotalNumPeople"),
     path('postMsgAPI/', postMessage, name="postMessage"),
     path('homepage/SendMsgPanel/', sendMsgPanel, name="sendMsgPanel"),
