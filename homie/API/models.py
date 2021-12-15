@@ -35,7 +35,7 @@ class Unit(models.Model):
         ordering = ['Unit_id', 'num_ppl']
 
     def save(self, *args, **kwargs):
-        super(Dorm, self).save(*args, **kwargs)
+        super(Unit, self).save(*args, **kwargs)
         self.num_ppl += 1
 
 
@@ -47,8 +47,8 @@ class User(models.Model):
     age = models.IntegerField(null=True, unique=False)
     gender = models.CharField(max_length=15, null=True, unique=False)
     RA_id = models.IntegerField(unique=True, null=True)
-    Unit_id = models.ForeignKey(to='API.Unit', on_delete=models.SET_NULL, null=True)
-    password = models.IntegerField(default=12345)
+    Unit_id = models.ForeignKey(to=Unit, on_delete=models.SET_NULL, null=True)
+    password = models.CharField(max_length = 25, default=12345)
     class meta():
         db_table = 'User'
         ordering = ['uid', 'name', 'email', 'RA_id', 'Unit_id']
@@ -87,6 +87,7 @@ class Lease(models.Model):
         super (Lease, self).save(*args, **kwargs)
 
 
+
 class Message(models.Model):
     msg_id = models.AutoField(primary_key=True)
     to = models.ForeignKey(to=User, related_name="recipient", on_delete=models.SET_NULL, null=True)
@@ -99,3 +100,40 @@ class Message(models.Model):
 
     def save(self, *args, **kwargs):
         super (Message, self).save(*args, **kwargs)
+
+    def __str__(self):
+        return self.name
+
+class Event(models.Model):
+    Event_id = models.AutoField(primary_key=True)
+    Event_name = models.CharField(max_length=25)
+    Description = models.CharField(max_length=50)
+    Dorm_id = models.ForeignKey(to='API.Dorm', on_delete=models.SET_NULL, null=True)
+    Date = models.CharField(max_length=10)
+
+    def __str__(self):
+        return self.name
+
+class EventRel(models.Model):
+    uid = models.ForeignKey(to='API.User', on_delete=models.SET_NULL, null=True)
+    Event_id = models.ForeignKey(to='API.Event', on_delete=models.SET_NULL, null=True)
+
+    def __str__(self):
+        return self.name
+
+class ResidentAssistant(models.Model):
+    RA_id = models.AutoField(primary_key=True)
+    RA_name = models.CharField(max_length = 40, unique=False)
+    Title = models.CharField(max_length=20, default="Basic RA")
+    Description = models.CharField(max_length=60, default="Basic RA duties: roam around the halls")
+
+class WorkOrder(models.Model):
+    Work_id = models.AutoField(primary_key=True)
+    Submitter = models.ForeignKey(to=User, on_delete=models.DO_NOTHING, related_name='Submitter', null=False)
+    RA_assigned = models.ForeignKey(to=User, on_delete=models.DO_NOTHING, related_name='RA_assigned', null=True)
+    Building_requested = models.ForeignKey(to=Unit, on_delete=models.DO_NOTHING)
+    description = models.CharField(max_length=255, null=True)
+    Submit_time = models.DateField(auto_now=True)
+    End_time = models.DateField(auto_now_add=True, null=True)
+    status = models.BooleanField(default=False)
+
