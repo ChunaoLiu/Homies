@@ -355,3 +355,7 @@ def sendWorkOrderPanel(request):
 def getOrder(request):
     template = loader.get_template('DisplayOrders.html')
     return HttpResponse(template.render({}, request))
+
+def logout(request):
+    template = loader.get_template('logout.html')
+    return HttpResponse(template.render({}, request))

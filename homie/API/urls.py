@@ -20,4 +20,5 @@ urlpatterns = [
     path('homepage/addWorkOrder/', sendWorkOrderPanel, name="sendWorkOrderPanel"),
     path('getOrder_API/', getOrder_API, name="getOrder"),
     path('homepage/getOrder/', getOrder, name="WorkOrder"),
+    path('homepage/logout/', logout, name="logout"),
 ]

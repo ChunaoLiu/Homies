@@ -35,9 +35,9 @@
                 <a href="Event.html">Event</a>
                 <a href="addWorkOrder/">Submit Work Order</a>
                 <a href="getOrder/">View My Work Order</a>
-                <a href="postMsgAPI/">Message</a>
+                <a href="SendMsgPanel/">Message</a>
                 <a href="RA_panel.html">Resident Assisstant</a>
-                <a href="Logout.html">Log out</a>
+                <a href="logout/">Log out</a>
             </div>
             <div style="flex: 1; padding-left: 50px; padding-right: 40px; width: 300px; text-align: left;">
                 <h1 style="text-align: left;", id="nameLabel"></h1><br />
@@ -53,6 +53,7 @@
             console.log(window.localStorage.getItem('email'))
             if (window.localStorage.getItem('status') == null) {
                 location.href = "http://34.134.110.35:8080/login/"
+                return 0;
             }
             var Useremail = window.localStorage.getItem('email');
             var myHeaders = new Headers();
@@ -103,7 +104,7 @@
                     switch (data['error_code']) {
                         case 0:
                             var is_RA = data['is_RA'];
-                            if (is_RA == false) {
+                            if (is_RA == true) {
                                 document.getElementById('RALabel').innerHTML = "You are a Resident Assisstance. You can use the RA panel!";
                             } else {
                                 document.getElementById('RALabel').innerHTML = "You are a regular resident. You can not use the RA panel!";

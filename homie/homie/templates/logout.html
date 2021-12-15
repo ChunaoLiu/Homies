@@ -1,0 +1,30 @@
+<html>
+    <head>
+        <style>
+
+        </style>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    </head>
+    <body onload="init()">
+        <div style="text-align: left;">
+
+        </div>
+        
+    </body>
+
+    <script type="text/javascript">
+        function init() {
+            var status = window.localStorage.getItem('status');
+            if (status == null) {
+                location.href = "http://34.134.110.35:8080/login/"
+                return 0;
+            } else {
+                window.localStorage.clear('status');
+                window.localStorage.clear('email');
+                window.alert("Log out successful!");
+                location.href = "http://34.134.110.35:8080/login/"
+                return 0;
+            }
+        }
+    </script>
+</html>
