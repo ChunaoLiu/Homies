@@ -37,7 +37,7 @@
 
 	<script type="text/javascript">
 		function Homepage() {
-			location.href = "http://localhost:8080/homepage/";
+			location.href = "http://34.134.110.35:8080/homepage/";
 		}
 		
 		function NewLease() {
@@ -53,9 +53,8 @@
 				method: 'POST',
 				headers: header,
 				body: raw,
-				redirect: 'follow'
-			};
-			const url = "http://localhost:8080/NewLeaseAPI/";
+				redirect: 'follow;
+			const url = "http://34.134.110.35:8080/NewLeaseAPI/";
 			fetch(url, requestOptions)
 				.then(response=>response.json())
 				.then(data => {
@@ -89,7 +88,7 @@
 				body: raw,
 				redirect: 'follow'
 			};
-			const url = "http://localhost:8080/viewlease/";
+			const url = "http://34.134.110.35:8080/viewlease/";
 			console.log("fetching\n");
 			fetch(url, requestOptions)
 				.then(response=>response.json())

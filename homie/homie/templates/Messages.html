@@ -27,7 +27,7 @@
 
 	<script type="text/javascript">
 		function homepage() {
-			location.href = "http://localhost:8080/homepage/";
+			location.href = "http://34.134.110.35:8080/homepage/";
 		}
 
 		function send() {
@@ -44,7 +44,7 @@
 				body: raw,
 				redirect: 'follow'
 			};
-			const url = "http://localhost:8080/MessageAPI/";
+			const url = "http://34.134.110.35:8080/MessageAPI/";
 			fetch(url, requestOptions)
 				.then(response=>response.json())
 				.then(data=>{
@@ -72,7 +72,7 @@
 				body: raw,
 				redirect: 'follow'
 			};
-			const url = "http://localhost:8080/viewInbox/";
+			const url = "http://34.134.110.35:8080/viewInbox/";
 			fetch(url, requestOptions)
 				.then(response=>response.json())
 				.then(data=>{
@@ -101,7 +101,7 @@
 				body: raw,
 				redirect: 'follow'
 			};
-			const url = "http://localhost:8080/viewOutbox/";
+			const url = "http://34.134.110.35:8080/viewOutbox/";
 			fetch(url, requestOptions)
 				.then(response=>response.json())
 				.then(data=>{
