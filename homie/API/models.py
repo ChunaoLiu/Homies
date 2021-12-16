@@ -80,10 +80,7 @@ class Lease(models.Model):
         ordering = ['Lease_id', 'User_id', 'lease_type', 'start_date', 'end_date']
 
     def save(self, *args, **kwargs):
-        if self._state.adding:
-            last_unit = Lease.objects.all.aggregate(largest=models.Max('Unit_id'))['largest']
-            if last_unit is not None:
-                self.unit_id = last_unit + 1
+        self.Unit_id_id = 1
         super (Lease, self).save(*args, **kwargs)
 
 
