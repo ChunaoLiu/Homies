@@ -12,3 +12,4 @@ pillow==8.3.2
 docker==5.0.3
 django-extensions==3.1.5
 django-cors-headers==3.10.1
+mysql-connector-python 8.0.27

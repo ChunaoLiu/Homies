@@ -13,9 +13,12 @@
                 }
             </style>
         </head>
-    
+        <body onload="init()">
+
+        </body>
         <div>
-            <h1 style="text-align: center; padding-bottom: 20px; padding-top: 20px;"> Join Homie Now! </h1>
+            <h1 style="text-align: center; padding-top: 20px;"> Join Homie Now! </h1>
+            <h2 style="text-align: center; padding-bottom: 20px; padding-top: 20px;" id = 'joinsir'>  </h1>
         </div>
     
         <form>
@@ -34,8 +37,8 @@
                 <label for="gender">Your gender:</label>
                 <select name="gender" id="gender">
                     <option value="Male">Male</option>
-                    <option value="Female">Male</option>
-                    <option value="Others">Male</option>
+                    <option value="Female">Female</option>
+                    <option value="Others">Others</option>
                 </select>
             </div><br>
             
@@ -53,6 +56,24 @@
         <script type="text/javascript">
             function redirect_login() {
                 location.href = "http://34.134.110.35:8080/homepage/";
+            }
+
+            function init() {
+                var myHeaders = new Headers();
+                myHeaders.append("Content-Type", "application/json");
+                var requestOptions = {
+                    method: 'GET',
+                    headers: myHeaders,
+                    redirect: 'follow'
+                };
+                const url = "http://34.134.110.35:8080/getNumResident/"
+                fetch(url, requestOptions)
+                .then(response => response.json())
+                .then(data => {
+                    console.log(data);
+                    var num_ppl = data['output'];
+                    document.getElementById("joinsir").innerHTML = num_ppl + ' residents have chosen Homie as their home\nJoin us and be resident number ' + (num_ppl + 1) + ' !'; 
+                });
             }
     
             function signup() {
@@ -79,10 +100,9 @@
                     switch (data['error_code']) {
                         case 0:
                             window.alert("Registration successful! Redirecting to the home page now...");
-                            jQuery(window).load(function() {
-                                localStorage.setItem('status', 'loggedIn');
-                                localStorage.setItem('email', document.getElementById("Useremail").value);
-                            });
+                            window.localStorage.setItem('status', 'loggedIn');
+                            window.localStorage.setItem('email', document.getElementById("Useremail").value);
+                            location.href = 'http://34.134.110.35:8080/homepage/';
                             break;
                         case 1:
                             window.alert("Error: Email already taken!");
@@ -94,5 +114,5 @@
                 });
             }
         </script>
-    </div>    
+    </div>
 </html>

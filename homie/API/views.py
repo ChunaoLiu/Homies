@@ -6,7 +6,7 @@ from django.db.models.query import QuerySet
 from django.shortcuts import render, HttpResponse
 from .serializer import UserSerializer
 from django.http import JsonResponse
-from .models import User, Lease, Message
+from .models import User, Lease, Message, Dorm, Unit, WorkOrder
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.decorators import APIView
@@ -24,6 +24,7 @@ from rest_framework.permissions import IsAuthenticated, AllowAny
 
 from django.db import transaction
 from django.core.serializers import serialize
+from django.db import connection
 
 # Create your views here.
 class AllUserList(APIView):
@@ -31,7 +32,7 @@ class AllUserList(APIView):
         users = User.objects.all()
         Serializer = UserSerializer(users, many=True)
         return Response(Serializer.data)
-    
+
 
 class SignupAPI(APIView):
     def post(self, request):
@@ -176,6 +177,7 @@ def getNameViaEmail(request):
     return response
 
 
+
 def getUIDViaEmail(email):
     return_data = {}
 
@@ -192,7 +194,143 @@ def getEmailViaUID(uid):
         return
     return exist_obj.email
 
+
+@api_view(http_method_names=['GET'])
+@permission_classes((AllowAny,))
+def getTotalNumPeople(request):
+    return_data = {}
+
+    num_ppl = User.objects.raw('SELECT uid, COUNT(*) FROM API_user GROUP BY uid;')
+    print(num_ppl)
+    print(len(list(num_ppl)))
+    return_data['output'] = len(list(num_ppl))
+    return HttpResponse(json.dumps(return_data),
+                            content_type='application/json', status=status.HTTP_200_OK)
+
+@api_view(http_method_names=['POST'])
+@permission_classes((AllowAny,))
+def getRA_API(request):
+    return_data = {}
+    senderEmail = request.data['senderEmail']
     
+    user = User.objects.raw('SELECT uid from API_user WHERE email=\'' + senderEmail + '\';')
+    for p in user:
+        if p.uid == None:
+            return_data['error_code'] = 1
+            return HttpResponse(json.dumps(return_data),
+                            content_type='application/json', status=status.HTTP_404_NOT_FOUND)
+
+    RA = User.objects.raw('SELECT uid, RA_id as RA from API_user WHERE email=\'' + senderEmail + '\';')
+    for p in RA:
+        if (p.RA is None):
+            return_data['is_RA'] = False
+        else:
+            return_data['is_RA'] = True
+    
+    Res = User.objects.raw('SELECT uid, Unit_id_id as unit FROM API_user WHERE email=\'' + senderEmail + '\';')
+    for p in Res:
+        if (p.unit is None):
+            return_data['unit'] = False
+        else:
+            unit = Unit.objects.raw('SELECT Unit_id, unit_name FROM API_unit WHERE Unit_id=\'' + p.unit + '\';')
+            for s in unit:
+                return_data['unit'] = s.unit_name
+                
+    return_data['error_code'] = 0        
+    return HttpResponse(json.dumps(return_data),
+                            content_type='application/json', status=status.HTTP_200_OK)
+
+
+@api_view(http_method_names=['POST'])
+@transaction.atomic()
+def set_Unit(request):
+    print (request.data)
+
+    return_data = {}
+
+    try:
+        dorm = Dorm.objects.get(Dorm_id=1)
+    except:
+        return_data['error_code'] = 1
+        return HttpResponse(json.dumps(return_data),
+                            content_type='application/json', status=status.HTTP_404_NOT_FOUND)
+    
+    new_unit = Unit.objects.create(unit_name='A-123', num_ppl=0, max_ppl=4, has_kitchen=True, has_laundry=True, Dorm_id=dorm)
+    return_data['error_code'] = 0
+    return HttpResponse(json.dumps(return_data),
+                            content_type='application/json', status=status.HTTP_200_OK)
+
+@api_view(http_method_names=['POST'])
+@transaction.atomic()
+def order_add(request):
+    print (request.data)
+
+    return_data = {}
+
+    user_Email = request.data['email']
+    unit_id = request.data['unit_id']
+    description = request.data['description']
+
+    try:
+        unit = Unit.objects.get(Unit_id=unit_id)
+    except:
+        return_data['error_code'] = 1
+        return HttpResponse(json.dumps(return_data),
+                            content_type='application/json', status=status.HTTP_404_NOT_FOUND)
+
+    try:
+        user = User.objects.get(email=user_Email)
+    except:
+        return_data['error_code'] = 2
+        return HttpResponse(json.dumps(return_data),
+                            content_type='application/json', status=status.HTTP_404_NOT_FOUND) 
+    
+    new_order = WorkOrder.objects.create(Submitter = user, description=description, Building_requested=unit)
+    return_data['error_code'] = 0
+    return HttpResponse(json.dumps(return_data),
+                            content_type='application/json', status=status.HTTP_200_OK)
+
+@api_view(http_method_names=['POST'])
+def getOrder_API(request):
+    print (request.data)
+
+    return_data = {}
+
+    getterEmail = request.data['email']
+
+    try:
+        user = User.objects.get(email=getterEmail)
+    except:
+        return_data['error_code'] = 1
+        return HttpResponse(json.dumps(return_data),
+                            content_type='application/json', status=status.HTTP_404_NOT_FOUND)
+    
+    all_order = []
+    desired_format = '%Y-%m-%d'
+    
+    orders = WorkOrder.objects.filter(Submitter=user)
+    for order in orders:
+        if (order.RA_assigned is None):
+            Ra = 'Not Assigned Yet'
+        else:
+            Ra = order.RA_assigned.name
+
+        if (order.status is False):
+            status_work='In Progress'
+            End_time = 'In Progress'
+        else:
+            status_work='Done'
+            End_time = order.End_time.strftime(desired_format)
+        order_info = [order.Submit_time.strftime(desired_format), End_time, order.description, Ra, status_work]
+        all_order.append(order_info)
+
+    return_data['all_orders'] = all_order
+
+    return_data['error_code'] = 0
+    return HttpResponse(json.dumps(return_data),
+                            content_type='application/json', status=status.HTTP_200_OK)
+
+
 def index(request):
     template = loader.get_template('index.html')
     return HttpResponse(template.render({}, request))
@@ -208,6 +346,7 @@ def test(request):
 def homePage(request):
     template = loader.get_template('homePage.html')
     return HttpResponse(template.render({}, request))
+
 def leasing(request):
     template = loader.get_template('Leasing.html')
     return HttpResponse(template.render({}, request))
@@ -275,3 +414,16 @@ def viewOutbox(request):
 def messages(request):
     template = loader.get_template('messages.html')
     return HttpResponse(template.render({}, request))
+
+def sendWorkOrderPanel(request):
+    template = loader.get_template('postOrder.html')
+    return HttpResponse(template.render({}, request))
+
+def getOrder(request):
+    template = loader.get_template('DisplayOrders.html')
+    return HttpResponse(template.render({}, request))
+
+def logout(request):
+    template = loader.get_template('logout.html')
+    return HttpResponse(template.render({}, request))
+

@@ -1,0 +1,90 @@
+<html>
+    <head>
+        <style>
+            .message {
+                padding-top: 20px;
+                text-align: center;
+                size: 300px;
+            }
+        </style>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    </head>
+    <body onload="init()">
+        <div style="text-align: center;">
+            <h2>Submit a work orders:</h2>
+        </div>
+        <div style="text-align: center;">
+            <div>
+                <label style="display: inline;">
+                    Your building:
+                </label>
+                <input style="display: inline;" type='text', id='Building_request'>
+            </div>
+            <div class="message">
+                <textarea id="textinput" name="textinput" rows="4" cols="50" placeholder="Order description here..."></textarea>
+            </div>
+            <div style="padding-top: 15px;">
+                <button onclick="sendOrder()" style="text-align: center; margin: auto; display: inline; width: 150px; height: 40px;">
+                    Submit
+                </button>
+            </div>
+        </div>
+        
+    </body>
+
+    <script type="text/javascript">
+        function init() {
+            
+        }
+        function sendOrder() {
+            var buildingID = document.getElementById('Building_request').value;
+            if (buildingID == null) {
+                window.alert("Please specify a building to repair!");
+                return 0;
+            }
+            var incomingMsg = document.getElementById('textinput').value;
+            if (incomingMsg == null) {
+                window.alert("Please, have some description.");
+                return 0;
+            }
+
+            var senderEmail = window.localStorage.getItem('email');
+            if (senderEmail == null) {
+                window.alert("Your login has expired. Please re-login");
+                location.href = "http://34.134.110.35:8080/login/";
+                return 0;
+            }
+
+            var myHeaders = new Headers();
+            myHeaders.append("Content-Type", "application/json");
+            var raw = JSON.stringify({
+                "email": senderEmail,
+                "unit_id": buildingID,
+                "description": incomingMsg
+            });
+            var requestOptions = {
+                method: 'POST',
+                headers: myHeaders,
+                body: raw,
+                redirect: 'follow'
+            };
+            const url = "http://34.134.110.35:8080/AddWorkOrder_API/"
+            fetch(url, requestOptions)
+            .then(response => response.json())
+            .then(data => {
+                console.log(data);
+                switch (data['error_code']) {
+                    case 0:
+                        window.alert("WorkOrder send successful!");
+                        break;
+                    case 2:
+                        window.alert("Error: Sender Email does not exist! This must be a magic!");
+                        break;
+                    case 1:
+                        window.alert("Error: Buildind does not exist!");
+                        break;
+                }
+            });
+        }
+    </script>
+</html>
